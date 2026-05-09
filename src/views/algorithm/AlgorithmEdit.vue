@@ -16,6 +16,9 @@
         <el-form-item label="副标题" prop="subtitle">
           <el-input v-model="form.subtitle" placeholder="一句话描述算法" />
         </el-form-item>
+        <el-form-item label="版本号" prop="version">
+          <el-input v-model="form.version" placeholder="如 V1.0.0" style="width: 300px" />
+        </el-form-item>
         <el-form-item label="详细描述" prop="description">
           <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入详细描述" />
         </el-form-item>
@@ -24,8 +27,34 @@
             <el-option v-for="cat in categories" :key="cat.id" :label="cat.name" :value="cat.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="封面图URL" prop="coverUrl">
-          <el-input v-model="form.coverUrl" placeholder="请输入封面图片URL" />
+        <el-form-item label="封面图" prop="coverUrl">
+          <div v-if="form.coverUrl" class="cover-preview-wrapper">
+            <el-image :src="form.coverUrl" fit="cover" class="cover-image" />
+            <el-button type="danger" link class="cover-delete-btn" @click="handleRemoveCover">
+              <el-icon><Delete /></el-icon>删除
+            </el-button>
+          </div>
+          <el-upload
+            v-else
+            class="cover-uploader"
+            drag
+            action="#"
+            :auto-upload="true"
+            :show-file-list="false"
+            :http-request="handleCoverUpload"
+            :before-upload="beforeCoverUpload"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+          >
+            <el-icon class="el-icon--upload"><PictureFilled /></el-icon>
+            <div class="el-upload__text">
+              拖拽图片到此处或 <em>点击上传</em>
+            </div>
+            <template #tip>
+              <div class="el-upload__tip">
+                支持 JPG / PNG / GIF / WebP，大小不超过 10MB
+              </div>
+            </template>
+          </el-upload>
         </el-form-item>
         <el-form-item label="视频URL" prop="videoUrl">
           <el-input v-model="form.videoUrl" placeholder="请输入视频URL（可选）" />
@@ -50,7 +79,7 @@
               <div class="model-meta">
                 <el-tag size="small" type="info">{{ form.modelFile.type.toUpperCase() }}</el-tag>
                 <span class="model-size">{{ formatFileSize(form.modelFile.size) }}</span>
-              </div>
+              </div>\
             </div>
             <el-button type="danger" link @click="handleRemoveModel">
               <el-icon><Delete /></el-icon>删除
@@ -177,7 +206,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules, UploadRawFile } from 'element-plus'
-import { Document, Delete, UploadFilled } from '@element-plus/icons-vue'
+import { Document, Delete, UploadFilled, PictureFilled } from '@element-plus/icons-vue'
 import {
   fetchAlgorithmDetail,
   createAlgorithm,
@@ -199,6 +228,7 @@ const formRef = ref<FormInstance>()
 const form = ref<Omit<Algorithm, 'id' | 'createTime' | 'updateTime' | 'latestVersion'> & { id?: string }>({
   name: '',
   subtitle: '',
+  version: '',
   description: '',
   coverUrl: '',
   videoUrl: '',
@@ -212,6 +242,7 @@ const form = ref<Omit<Algorithm, 'id' | 'createTime' | 'updateTime' | 'latestVer
 const rules: FormRules = {
   name: [{ required: true, message: '请输入算法名称', trigger: 'blur' }],
   subtitle: [{ required: true, message: '请输入副标题', trigger: 'blur' }],
+  version: [{ required: true, message: '请输入版本号', trigger: 'blur' }],
   description: [{ required: true, message: '请输入详细描述', trigger: 'blur' }],
   categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
   status: [{ required: true, message: '请选择状态', trigger: 'change' }],
@@ -288,6 +319,42 @@ function handleModelUpload(options: any) {
 function handleRemoveModel() {
   form.value.modelFile = undefined
   ElMessage.success('模型已删除')
+}
+
+// 封面图上传
+const MAX_COVER_SIZE = 10 * 1024 * 1024 // 10MB
+const ALLOWED_COVER_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+
+function beforeCoverUpload(rawFile: UploadRawFile): boolean {
+  if (!ALLOWED_COVER_TYPES.includes(rawFile.type)) {
+    ElMessage.error('仅支持 JPG / PNG / GIF / WebP 格式的图片')
+    return false
+  }
+  if (rawFile.size > MAX_COVER_SIZE) {
+    ElMessage.error('图片大小超过 10MB 限制')
+    return false
+  }
+  return true
+}
+
+function handleCoverUpload(options: any) {
+  const file = options.file as File
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    form.value.coverUrl = e.target?.result as string
+    ElMessage.success('封面图上传成功')
+    options.onSuccess?.('ok')
+  }
+  reader.onerror = () => {
+    ElMessage.error('图片读取失败')
+    options.onError?.(new Error('read error'))
+  }
+  reader.readAsDataURL(file)
+}
+
+function handleRemoveCover() {
+  form.value.coverUrl = ''
+  ElMessage.success('封面图已删除')
 }
 
 // 版本管理
@@ -470,5 +537,27 @@ onMounted(() => {
 .model-size {
   font-size: 12px;
   color: #909399;
+}
+
+.cover-preview-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.cover-image {
+  width: 320px;
+  height: 160px;
+  border-radius: 6px;
+  border: 1px solid #e4e7ed;
+}
+
+.cover-delete-btn {
+  margin-top: 4px;
+}
+
+.cover-uploader {
+  width: 100%;
 }
 </style>

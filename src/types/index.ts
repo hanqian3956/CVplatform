@@ -29,6 +29,7 @@ export interface Algorithm {
   categoryId: string
   categoryName: string
   status: 'online' | 'offline'
+  version: string
   latestVersion: string
   scenes: AlgorithmScene[]
   modelFile?: AlgorithmModelFile
