@@ -10,6 +10,9 @@ let configs: UserAlgorithmConfig[] = [
     algorithmName: '烟火检测算法',
     startTime: '2024-01-01',
     endTime: '2025-01-01',
+    purchaseStatus: 'purchased',
+    videoChannels: 8,
+    operator: '管理员',
     createTime: '2024-01-01 10:00:00',
   },
   {
@@ -21,6 +24,9 @@ let configs: UserAlgorithmConfig[] = [
     algorithmName: '安全帽识别',
     startTime: '2024-03-01',
     endTime: '2024-12-31',
+    purchaseStatus: 'trial',
+    videoChannels: 4,
+    operator: '运营人员',
     createTime: '2024-03-01 14:30:00',
   },
 ]
@@ -85,7 +91,7 @@ export function getUserAlgorithmSummaries(params: {
   const userMap = new Map<string, UserAlgorithmSummary>()
 
   for (const config of configs) {
-    if (keyword && !config.userName.includes(keyword) && !config.userId.includes(keyword)) {
+    if (keyword && !config.userName.includes(keyword) && !config.company.includes(keyword)) {
       continue
     }
 

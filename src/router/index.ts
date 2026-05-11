@@ -46,7 +46,7 @@ const router = createRouter({
           path: '/user-algorithm/config',
           name: 'UserAlgorithmConfig',
           component: () => import('@/views/user-algorithm/UserAlgorithmConfig.vue'),
-          meta: { title: '用户管理', permission: 'user-algorithm:list' },
+          meta: { title: '租户管理', permission: 'user-algorithm:list' },
         },
         {
           path: '/system/user',

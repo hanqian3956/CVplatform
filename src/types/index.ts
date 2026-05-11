@@ -54,6 +54,10 @@ export interface UserAlgorithmConfig {
   algorithmName: string
   startTime: string
   endTime: string
+  purchaseStatus: 'trial' | 'purchased'
+  videoChannels: number
+  cancelled?: boolean
+  operator?: string
   createTime: string
 }
 
@@ -97,6 +101,7 @@ export interface User {
   username: string
   nickname: string
   password: string
+  phone: string
   roleIds: string[]
   roleNames: string[]
   status: 'enabled' | 'disabled'
@@ -108,4 +113,35 @@ export interface PageResult<T> {
   total: number
   page: number
   pageSize: number
+}
+
+export type AuditStatus = 'pending' | 'approved' | 'rejected'
+
+export interface EnterpriseAudit {
+  id: string
+  enterpriseName: string
+  contactName: string
+  contactPhone: string
+  salesPerson: string
+  remark: string
+  status: AuditStatus
+  auditor?: string
+  auditRemark?: string
+  auditTime?: string
+  createTime: string
+}
+
+export interface AlgorithmTrialAudit {
+  id: string
+  enterpriseName: string
+  algorithmId: string
+  algorithmName: string
+  videoChannels: number
+  applicantName: string
+  applicantPhone: string
+  status: AuditStatus
+  auditor?: string
+  auditRemark?: string
+  auditTime?: string
+  createTime: string
 }

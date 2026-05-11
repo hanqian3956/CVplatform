@@ -12,6 +12,7 @@
         <el-table-column type="index" label="序号" width="70" align="center" />
         <el-table-column prop="username" label="用户名" width="150" />
         <el-table-column prop="nickname" label="昵称" min-width="150" />
+        <el-table-column prop="phone" label="联系方式" width="140" />
         <el-table-column prop="roleNames" label="角色" min-width="200">
           <template #default="{ row }">
             <el-tag v-for="(name, idx) in row.roleNames" :key="idx" size="small" style="margin-right: 4px">
@@ -42,6 +43,9 @@
         </el-form-item>
         <el-form-item label="昵称" prop="nickname">
           <el-input v-model="form.nickname" placeholder="请输入昵称" />
+        </el-form-item>
+        <el-form-item label="联系方式" prop="phone">
+          <el-input v-model="form.phone" placeholder="请输入手机号" maxlength="11" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
           <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password />
@@ -86,6 +90,7 @@ const form = ref({
   username: '',
   nickname: '',
   password: '',
+  phone: '',
   roleIds: [] as string[],
   status: 'enabled' as 'enabled' | 'disabled',
 })
@@ -94,6 +99,10 @@ const rules: FormRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+  phone: [
+    { required: true, message: '请输入联系方式', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' },
+  ],
   roleIds: [{ required: true, message: '请选择角色', trigger: 'change', type: 'array' }],
 }
 
@@ -111,7 +120,7 @@ async function loadRoles() {
 
 function handleAdd() {
   isEdit.value = false
-  form.value = { username: '', nickname: '', password: '', roleIds: [], status: 'enabled' }
+  form.value = { username: '', nickname: '', password: '', phone: '', roleIds: [], status: 'enabled' }
   dialogVisible.value = true
 }
 
@@ -122,6 +131,7 @@ function handleEdit(row: User) {
     username: row.username,
     nickname: row.nickname,
     password: '',
+    phone: row.phone || '',
     roleIds: row.roleIds,
     status: row.status,
   }
@@ -144,6 +154,7 @@ async function handleSubmit() {
   if (isEdit.value) {
     const data: Partial<User> = {
       nickname: form.value.nickname,
+      phone: form.value.phone,
       roleIds: form.value.roleIds,
       status: form.value.status,
     }

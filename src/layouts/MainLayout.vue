@@ -24,7 +24,7 @@
         </el-menu-item>
         <el-menu-item v-if="hasMenuPermission('user-algorithm:list')" index="/user-algorithm/config">
           <el-icon><User /></el-icon>
-          <template #title>用户管理</template>
+          <template #title>租户算法</template>
         </el-menu-item>
         <el-sub-menu v-if="hasSystemMenu" index="/system">
           <template #title>
